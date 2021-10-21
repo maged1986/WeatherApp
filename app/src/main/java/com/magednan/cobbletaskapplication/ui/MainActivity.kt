@@ -18,15 +18,13 @@ import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
-
     //DataBinding
     private lateinit var binding: ActivityMainBinding
-
     //ViewModel
     val viewModel by viewModels<MainViewModel>()
-
     //RVAdapter
     lateinit var weatherAdapter: WeatherAdapter
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         //DataBinding inflate
@@ -35,12 +33,8 @@ class MainActivity : AppCompatActivity() {
         //ToolBar inflate
         setSupportActionBar(binding.toolBar)
         binding.toolBar.setLogo(R.drawable.ic_location)
-        //get Data From SharedPreferences
-        val prefs = getSharedPreferences("MY_PREFS_NAME", MODE_PRIVATE)
-        val name = prefs.getString("city", "Newyork") //"No name defined" is the default value.
-        val latitude = prefs.getFloat("Latitude", 40.730610F) //"No name defined" is the default value.
-        val longitude = prefs.getFloat("Longitude", -73.935242F) //"No name defined" is the default value.
-        getSupportActionBar()?.setTitle(name);
+
+        getSupportActionBar()?.setTitle("Newyork");
         //Rv Inflate
         binding.mainRv.apply {
             val linearLayoutManager = LinearLayoutManager(this@MainActivity)
@@ -48,7 +42,9 @@ class MainActivity : AppCompatActivity() {
             layoutManager = linearLayoutManager
             itemAnimator = null
         }
-        //get Data From API
+        //get Data From viewModel
+        val latitude =  40.730610
+        val longitude = -73.935242
         lifecycleScope.launch(Dispatchers.Main) {
             viewModel.getData(latitude.toDouble(), longitude.toDouble())
             viewModel.listLiveData.observe(this@MainActivity, Observer {
@@ -67,48 +63,30 @@ class MainActivity : AppCompatActivity() {
 
     //Handling OptionsItem
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        //set Data to SharedPreferences
-        val editor = getSharedPreferences("MY_PREFS_NAME", MODE_PRIVATE).edit()
-        val prefs = getSharedPreferences("MY_PREFS_NAME", MODE_PRIVATE)
-
+        //set Data to cities
         return when (item.itemId) {
             R.id.newyork -> {
-                editor.putString("city", "newyork").putFloat("Latitude", 40.730610F)
-                        .putFloat("Longitude", 40.730610F).apply()
-                val name = prefs.getString("city", "Nework") //"No name defined" is the default value.
-                getSupportActionBar()?.setTitle(name);
-                val latitude = prefs.getFloat("Latitude", 40.730610F) //"No name defined" is the default value.
-                val longitude = prefs.getFloat("Longitude", -73.935242F) //"No name defined" is the defaul
-                lifecycleScope.launch(Dispatchers.Main) {
-                    viewModel.getData(latitude.toDouble(), longitude.toDouble())
-                }
-                return true
-            }
-            R.id.los_angeles -> {
-                editor.putString("city", "los Angeles").putFloat("Latitude", 34.052235F)
-                        .putFloat("Longitude", -118.243683F).apply()
-                val name = prefs.getString("city", "Nework") //"No name defined" is the default value.
-                getSupportActionBar()?.setTitle(name);
-                val latitude = prefs.getFloat("Latitude", 40.730610F) //"No name defined" is the default value.
-                val longitude = prefs.getFloat("Latitude", -73.935242F) //"No name defined" is the defaul
-                lifecycleScope.launch(Dispatchers.Main) {
-                    viewModel.getData(latitude.toDouble(), longitude.toDouble())
-                }
+                setData("Newyork",40.730610,40.730610)
                 return true
             }
             R.id.miami -> {
-                editor.putString("city", "miami").putFloat("Latitude", 39.5092198F)
-                        .putFloat("Longitude", -84.7341196F).apply()
-                val name = prefs.getString("city", "Nework") //"No name defined" is the default value.
-                getSupportActionBar()?.setTitle(name);
-                val latitude = prefs.getFloat("Latitude", 40.730610F) //"No name defined" is the default value.
-                val longitude = prefs.getFloat("Longitude", -73.935242F) //"No name defined" is the defaul
-                lifecycleScope.launch(Dispatchers.Main) {
-                    viewModel.getData(latitude.toDouble(), longitude.toDouble())
-                }
+
+                setData("Miami",39.5092198,-84.7341196)
+                return true
+            }
+            R.id.los_angeles -> {
+
+                setData("Los Angeles",34.052235,-118.243683)
                 return true
             }
             else -> super.onOptionsItemSelected(item)
+        }
+    }
+    private fun setData(city:String,latitude:Double,longitude:Double){
+        //set Data to chosen city
+        getSupportActionBar()?.setTitle(city);
+        lifecycleScope.launch(Dispatchers.Main) {
+            viewModel.getData(latitude.toDouble(), longitude.toDouble())
         }
     }
 }
